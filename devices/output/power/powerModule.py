@@ -46,3 +46,48 @@
 # Drasko DRASKOVIC <drasko.draskovic@gmail.com>
 #
 ###
+from weioLib.weio import *
+from weioLib.weioSPI import SPILib
+
+
+
+class PowerModule:
+    def __init__(self, port):
+        if (port>1):
+            sys.stderr.write("Error! PowerModule can be only on ports 0 or 1")
+        else :
+            self.spi = SPILib(0) # init SPI on port 0 (pins : 2,3,4)
+
+            if (port==0):
+                self.latchPin = 5
+            else :
+                self.latchPin = 13
+
+            self.output = 0
+            # Pin mapping
+            self.mapping = [8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7]
+
+    def digitalWrite(self, pin, value):
+        # Due to the hardware mapping, some swapping must be done
+        if value == 0:
+            self.output &= ~(1 << self.mapping[pin])
+        else:
+            self.output |= (1 << self.mapping[pin])
+
+        self.fire()
+
+    def portWrite(self, value): # 16 bit value here please
+        byteA = value & 0xFF
+        byteB = value >> 8
+        result = (byteA << 8) | byteB
+        self.output = result
+        self.fire()
+
+    def fire(self):
+
+        first = self.output & 0xFF
+        second = (self.output>>8) & 0xFF
+
+        digitalWrite(self.latchPin, LOW)
+        self.spi.write_byte_data(first, second)
+        digitalWrite(self.latchPin, HIGH)

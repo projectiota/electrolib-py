@@ -46,3 +46,22 @@
 # Drasko DRASKOVIC <drasko.draskovic@gmail.com>
 #
 ###
+
+from weioLib.weio import *
+
+class Dht:
+    def __init__(self, pin):
+        self.pin = pin
+
+    def getTemperature(self):
+        a = dhtRead(self.pin)
+        temp = a[2] + a[3]/100.0
+        return temp
+
+    def getHumidity(self):
+        a = dhtRead(self.pin)
+        humidity = a[0] + a[1]/100.0
+        return humidity
+
+    def readRawSensor(self):
+        return dhtRead(self.pin)

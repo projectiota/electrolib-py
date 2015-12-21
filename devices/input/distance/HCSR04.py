@@ -46,3 +46,17 @@
 # Drasko DRASKOVIC <drasko.draskovic@gmail.com>
 #
 ###
+
+from weioLib.weio import *
+
+class HCSR04 :
+
+    def __init__(self, trigger, echo):
+        self.trigger = trigger
+        self.echo = echo
+
+    def distCentimeters(self):
+        return HCSR04Read(self.trigger, self.echo)
+
+    def distInches(self):
+        return float(HCSR04Read(self.trigger, self.echo))/2.54

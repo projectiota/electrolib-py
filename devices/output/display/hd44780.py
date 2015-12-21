@@ -46,3 +46,62 @@
 # Drasko DRASKOVIC <drasko.draskovic@gmail.com>
 #
 ###
+
+from weioLib.weio import *
+
+LCD_RS = 0x40
+LCD_EN = 0x20
+LCD_CMD = 0
+LCD_STR = 1
+
+class Hd44780:
+    LINE1 = 0x80                                                       
+    LINE2 = 0xC0 
+    
+    def __init__(self, port):
+        self.port = port
+        portMode(self.port, OUTPUT)
+
+        # Initialise display
+        self.__lcd_byte(0x33, LCD_CMD)
+        self.__lcd_byte(0x32, LCD_CMD)
+        self.__lcd_byte(0x28, LCD_CMD)
+        self.__lcd_byte(0x0C, LCD_CMD)
+        self.__lcd_byte(0x06, LCD_CMD)
+        self.__lcd_byte(0x01, LCD_CMD)  
+        
+    def selectLine(self, line):
+        self.__lcd_byte(line, LCD_CMD)
+
+    def writeString(self, message):
+        # Send string to display
+    
+        message = message.ljust(16," ")  
+        
+        for i in range(16):
+            self.__lcd_byte(ord(message[i]),LCD_STR)
+        
+    def __lcd_byte(self, bits, mode):
+        msg = 0
+        if mode:
+            msg = (LCD_RS | (bits >> 4))
+        else:
+            msg = (bits >> 4)
+        portWrite(self.port, msg)
+                                
+        msg = msg + LCD_EN
+        portWrite(self.port, msg)
+        msg = msg - LCD_EN
+        portWrite(self.port, msg)
+                                                    
+        msg = 0
+        if mode:
+            msg = (LCD_RS | (bits & 0x0F))
+        else:
+            msg = (bits & 0x0F)
+        portWrite(self.port, msg)
+                                                                                   
+        msg = msg + LCD_EN
+        portWrite(self.port, msg)
+        msg = msg - LCD_EN
+        portWrite(self.port, msg)

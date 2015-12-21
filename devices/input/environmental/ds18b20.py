@@ -41,8 +41,30 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Authors : 
-# Uros PETREVSKI <uros@nodesign.net>
-# Drasko DRASKOVIC <drasko.draskovic@gmail.com>
+# Author : 
+# Paul RATHGEB <paul.rathgeb@skynet.be>
 #
 ###
+
+from weioLib.weio import *
+from things.input.environmental.digitemp.master import UART_Adapter
+from things.input.environmental.digitemp.device import AddressableDevice
+from things.input.environmental.digitemp.device import DS18B20 as __DS18B20__
+from weioLib.weio import initSerial
+
+class DS18B20:
+    def __init__(self):
+        dev = "/dev/lpcUart"
+        ser = initSerial(dev, 9600)
+        ser.close()
+        self.bus = UART_Adapter(dev)
+
+    def getSensors(self):
+        sensorIdList=AddressableDevice(self.bus).get_connected_ROMs()
+        return sensorIdList
+ 
+    def sensorInfo(self, rom):
+        return __DS18B20__(self.bus, rom).info()
+
+    def getTemperature(self, rom):
+        return __DS18B20__(self.bus, rom).get_temperature()
